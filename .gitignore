@@ -58,6 +58,9 @@ jspm_packages/
 # SAM Build directories
 .aws-sam/
 
+# SAM Config local store
+samconfig.toml
+
 # Typescript v1 declaration files
 typings/
 

@@ -1,39 +1,49 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: Amazon Pinpoint WeChat Channel.  This application will deliver Amazon Pinpoint triggered messages to WeChat using wechat-api. Written in Javascript.
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  amazon-pinpoint-wechat-channel
 
-  Sample SAM Template for amazon-pinpoint-wechat-channel
-  
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Parameters:
+  APPID:
+    Type: String
+    Description: APPID for WeChat Official Account
+  APPSECRET:
+    Type: String
+    Description: APPSECRET for WeChat Official Account
+
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 30
 
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  PinpointWeChatChannelFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello-world/
-      Handler: app.lambdaHandler
+      FunctionName: AmazonPinpointWeChatChannel
+      CodeUri: pinpointwechat/
+      Policies:
+        - Statement:
+          - Sid: PinpointPutEvents
+            Effect: Allow
+            Action: mobiletargeting:PutEvents
+            Resource: !Sub arn:${AWS::Partition}:mobiletargeting:${AWS::Region}:${AWS::AccountId}:*
+      Handler: app.lambda_handler
       Runtime: nodejs12.x
-      Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /hello
-            Method: get
+      Environment:
+        Variables:
+          APP_ID:
+            Ref: APPID
+          APP_SECRET:
+            Ref: APPSECRET
+
+  PinpointInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref PinpointWeChatChannelFunction
+      Principal: !Sub pinpoint.${AWS::Region}.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:mobiletargeting:${AWS::Region}:${AWS::AccountId}:apps/*
 
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  PinpointWeChatChannelFunction:
+    Description: "A function invoked by an Amazon Pinpoint Campaign or Journey that sends a message to a user through Twitter"
+    Value: !GetAtt PinpointWeChatChannelFunction.Arn
