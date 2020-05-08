@@ -8,16 +8,19 @@ var appsecret = process.env.APP_SECRET
 var api = new WechatAPI(appid, appsecret);
 
 exports.lambda_handler = (event, context, callback) => {
-    // var templateId = '7BCdeF9hIJ0Kl-aB6KvJ59ZM7jfj6fBIf1OL_-dDFb6'
+    //templateId determines the template you will be using to configure the message
     var templateId = event.templateId
-    console.log(">>>>>>>>");
-    console.log(templateId);
-    // URL置空，则在发送后,点击模板消息会进入一个空白页面（ios）, 或无法点击（android）
-    // var url =  'z.cn';
+    //customer will be redirected to this url after they click the message
     var url = event.url;
-    // var openid = 'opDi3TmaFiF98ABCDEF_9M9nHJK';
+    //openId is customer's wechat account userid
     var openid = event.openid;
-    var data = {};
+    //request body which contains data to be put into the template
+    var data = {
+        "serviceName": {
+          "value": event.serviceName,
+          "color": "#173177"
+        }
+    };
     api.sendTemplate(openid, templateId, url, data, function (err, res) {
     if (err) return console.error(err);
     console.log(JSON.stringify(res));
