@@ -9,6 +9,9 @@ Parameters:
   APPSECRET:
     Type: String
     Description: APPSECRET for WeChat Official Account
+  TEMPLATEID:
+    Type: String
+    Description: TEMPLATEID for the messages sent by this lambda function
 
 Globals:
   Function:
@@ -34,6 +37,8 @@ Resources:
             Ref: APPID
           APP_SECRET:
             Ref: APPSECRET
+          TEMPLATE_ID:
+            Ref: TEMPLATEID
 
   PinpointInvokePermission:
     Type: AWS::Lambda::Permission
